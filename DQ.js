@@ -1,7 +1,3 @@
-'use strict';
-
-import util from 'util';
-
 import _ from 'lodash';
 import request from 'request';
 import URL from 'url';
@@ -40,83 +36,55 @@ export class DQ extends EventEmitter {
 		}, 3000);
 
 	}
-	send(data, cb) {
 
+	send(data, cb) {
 		const to = data.to;
 		const text = data.text;
-
-		const url = this._sendMessageUrl + "?chat_id=" + to + "&text=" + text;
-
+		const url = `${this._sendMessageUrl}?chat_id=${to}&text=${text}`;
 		request(url, (err, response, body) => {
-
 			if (err) cb(err);
-
 			console.log("Message sent.")
 		});
 	}
 
 	initModule(text) {
-
 		if (this._hasCommand(text)) {
-
 			const moduleName = this._getCommandName(text);
-
 			return this._modules[moduleName](text);
-
 		} else return this._modules.default();
 	}
 
 	_httpGet(cb) {
-
 		const url = this._httpGetUpdatesUrl + "?offset=" + this._offset;
-
 		request(url, (err, res, body) => {
-
 			if (err) cb(err);
 
 			const bodyObj = JSON.parse(body);
-
 			if (bodyObj.ok) {
-
 				const messages = bodyObj.result;
-
 				if (messages.length > 0) {
-
 					this._updateOffset(messages);
-
 					cb(null, messages);
-
 				} else {
-
 					logger.info("No new messages..");
-
 					return cb(null);
 				}
-
 			} else return cb("Response looks wrong..");
-
 		});
 	}
 
 	_getUpdates(cb) {
-
 		this._httpGet((err, messages) => {
-
 			if (err) cb(err);
-
 			this._eachMessage(messages, (err, message) => {
-
 				if (err) logger.error(err);
-
 				this.emit('message', message);
 			});
 		});
 	}
 
 	_eachMessage(msgs, cb) {
-
 		_.forEach(msgs, (msg) => {
-
 			const to = this._recipient = msg.message.from.id;
 			const text = msg.message.text;
 
@@ -128,13 +96,9 @@ export class DQ extends EventEmitter {
 	}
 
 	_hasCommand(text) {
-
 		const modules = this._moduleList;
-
 		for (let key in modules) {
-
 			if (modules.hasOwnProperty(key)) {
-
 				if (string(text).contains(modules[key])) return true;
 			}
 		}
@@ -143,30 +107,22 @@ export class DQ extends EventEmitter {
 	}
 
 	_getCommandName(text) {
-
 		const modules = this._moduleList;
-
 		for (let key in modules) {
-
 			if (modules.hasOwnProperty(key)) {
-
 				if (string(text).contains(modules[key])) return key;
 			}
 		}
 	}
 
 	_updateOffset(messages) {
-
 		this._offset = this._getHighestOffset(messages) + 1;
 		logger.info("Updating offset..");
 	}
 
 	_getHighestOffset(messages) {
-
 		let arr = [];
-
 		_.map(messages, (msg) => {
-
 			arr.push(msg.update_id);
 		});
 
@@ -175,5 +131,3 @@ export class DQ extends EventEmitter {
 
 
 }
-
-// export default {DQ};
