@@ -1,178 +1,179 @@
 'use strict';
 
-const util = require('util');
+import util from 'util';
 
-const _ = require('underscore');
-const request = require('request');
-const URL = require('url');
-const string = require('string');
-const logger = require('intel');
+import _ from 'underscore';
+import request from 'request';
+import URL from 'url';
+import string from 'string';
+import logger from 'intel';
 
-const modulesList = require('./lib/modulesList');
-const modules = require('./lib/modules');
+import modulesList from './lib/modulesList';
+import modules from './lib/modules';
+import { EventEmitter } from 'events';
 
-// Class constructor
-const DQ = function (params) {
+export class DQ extends EventEmitter {
+	constructor(params) {
+		super(params);
+		this._token = params.token;
+		this._host = URL.format({
+			protocol: 'https',
+			host: 'api.telegram.org',
+			pathname: 'bot'
+		});
+		this._parent = (typeof params.parent === 'undefined') ? null : params.parent;
+		this._recipient = null;
+		this._offset = 0;
+		this._httpGetUpdatesUrl = this._host + this._token + '/getUpdates';
+		this._sendMessageUrl = this._host + this._token + '/sendMessage';
+		this._moduleList = (typeof params.moduleList === 'undefined') ? modulesList : params.moduleList;
+		this._modules = (typeof params.modules === 'undefined') ? modules : params.modules;
+	}
 
-    this._token = params.token;
-    this._host = URL.format({
-        protocol: "https",
-        host: "api.telegram.org",
-        pathname: "bot"
-    });
-    this._parent = (typeof params.parent === 'undefined') ? null : params.parent;
-    this._recipient = null;
-    this._offset = 0;
-    this._httpGetUpdatesUrl = this._host + this._token + "/getUpdates";
-    this._sendMessageUrl = this._host + this._token + "/sendMessage";
-    this._moduleList = (typeof params.moduleList === 'undefined') ? modulesList : params.moduleList;
-    this._modules = (typeof params.modules === 'undefined') ? modules : params.modules;
+	listen(cb) {
+		setInterval(() => {
 
-    this.listen = (cb) => {
+			this._getUpdates((err) => {
+				if (err) cb(er);
+			});
 
-      setInterval(() => {
+		}, 3000);
 
-        this._getUpdates((err) => {
-          if (err) cb(er);
-        });
+	}
+	send(data, cb) {
 
-      }, 3000);
-    }
+		const to = data.to;
+		const text = data.text;
 
-    this.send = (data, cb) => {
+		const url = this._sendMessageUrl + "?chat_id=" + to + "&text=" + text;
 
-      const to = data.to;
-      const text = data.text;
+		request(url, (err, response, body) => {
 
-      const url = this._sendMessageUrl + "?chat_id=" + to + "&text=" + text;
+			if (err) cb(err);
 
-      request(url, (err, response, body) => {
+			console.log("Message sent.")
+		});
+	}
 
-          if (err) cb(err);
+	initModule(text) {
 
-          console.log("Message sent.")
-      });
-    }
+		if (this._hasCommand(text)) {
 
-    this.initModule = (text) => {
+			const moduleName = this._getCommandName(text);
 
-      if (this._hasCommand(text)){
+			return this._modules[moduleName](text);
 
-          const moduleName = this._getCommandName(text);
+		} else return this._modules.default();
+	}
 
-          return this._modules[moduleName](text);
+	_httpGet(cb) {
 
-      } else return this._modules.default();
-    }
+		const url = this._httpGetUpdatesUrl + "?offset=" + this._offset;
 
-    this._httpGet = (cb) => {
+		request(url, (err, res, body) => {
 
-      const url = this._httpGetUpdatesUrl + "?offset=" + this._offset;
+			if (err) cb(err);
 
-      request(url, (err, res, body) => {
+			const bodyObj = JSON.parse(body);
 
-          if (err) cb(err);
+			if (bodyObj.ok) {
 
-          const bodyObj = JSON.parse(body);
+				const messages = bodyObj.result;
 
-          if (bodyObj.ok) {
+				if (messages.length > 0) {
 
-              const messages = bodyObj.result;
+					this._updateOffset(messages);
 
-              if (messages.length > 0) {
+					cb(null, messages);
 
-                  this._updateOffset(messages);
+				} else {
 
-                  cb(null, messages);
+					logger.info("No new messages..");
 
-              } else {
+					return cb(null);
+				}
 
-                  logger.info("No new messages..");
+			} else return cb("Response looks wrong..");
 
-                  return cb(null);
-              }
+		});
+	}
 
-          } else return cb("Response looks wrong..");
+	_getUpdates(cb) {
 
-      });
-    }
+		this._httpGet((err, messages) => {
 
-    this._getUpdates = (cb) => {
+			if (err) cb(err);
 
-      this._httpGet((err, messages) => {
+			this._eachMessage(messages, (err, message) => {
 
-          if (err) cb(err);
+				if (err) logger.error(err);
 
-          this._eachMessage(messages, (err, message) => {
+				this.emit('message', message);
+			});
+		});
+	}
 
-              if (err) logger.error(err);
+	_eachMessage(msgs, cb) {
 
-              this.emit('message', message);
-          });
-      });
-    }
+		_.each(msgs, (msg) => {
 
-    this._eachMessage = (msgs, cb) => {
+			const to = this._recipient = msg.message.from.id;
+			const text = msg.message.text;
 
-      _.each(msgs, (msg) => {
+			cb(null, {
+				to,
+				text
+			});
+		});
+	}
 
-          const to = this._recipient = msg.message.from.id;
-          const text = msg.message.text;
+	_hasCommand(text) {
 
-          cb(null, {
-            to,
-            text
-          });
-      });
-    }
+		const modules = this._moduleList;
 
-    this._hasCommand = (text) => {
+		for (let key in modules) {
 
-      const modules = this._moduleList;
+			if (modules.hasOwnProperty(key)) {
 
-      for (let key in modules) {
+				if (string(text).contains(modules[key])) return true;
+			}
+		}
 
-          if (modules.hasOwnProperty(key)) {
+		return false;
+	}
 
-              if (string(text).contains(modules[key])) return true;
-          }
-      }
+	_getCommandName(text) {
 
-      return false;
-    }
+		const modules = this._moduleList;
 
-    this._getCommandName = (text) => {
+		for (let key in modules) {
 
-      const modules = this._moduleList;
+			if (modules.hasOwnProperty(key)) {
 
-      for (let key in modules) {
+				if (string(text).contains(modules[key])) return key;
+			}
+		}
+	}
 
-          if (modules.hasOwnProperty(key)) {
+	_updateOffset(messages) {
 
-              if (string(text).contains(modules[key])) return key;
-          }
-      }
-    }
+		this._offset = this._getHighestOffset(messages) + 1;
+		logger.info("Updating offset..");
+	}
 
-    this._updateOffset = (messages) => {
+	_getHighestOffset(messages) {
 
-      this._offset = this._getHighestOffset(messages) + 1;
-      logger.info("Updating offset..");
-    }
+		let arr = [];
 
-    this._getHighestOffset = (messages) => {
+		_.map(messages, (msg) => {
 
-      let arr = [];
+			arr.push(msg.update_id);
+		});
 
-      _.map(messages, (msg) => {
+		return Math.max.apply(null, arr);
+	}
 
-          arr.push(msg.update_id);
-      });
 
-      return Math.max.apply(null, arr);
-    }
-};
+}
 
-util.inherits(DQ, require('events').EventEmitter);
-
-module.exports = DQ;
+// export default {DQ};

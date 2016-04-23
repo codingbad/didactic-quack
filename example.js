@@ -1,6 +1,6 @@
-const DQ = require('./');
-const config = require('./config/conf');
-const logger = require('intel');
+import { DQ } from './DQ.js';
+import config from './config/conf.js';
+import logger from 'intel';
 
 const dq = new DQ({
     token: config.token,

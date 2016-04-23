@@ -22,17 +22,25 @@ Wrapper around [Telegram](https://telegram.org/) messenger API.
 #### In `app.js`:
 
 ```javascript
-var DQ = require('didactic-quack');
-       
-var dq = new DQ({
-    "token": "your_telegram_bot_api_token"
+const DQ = require('didactic-quack');
+
+const dq = new DQ({
+    token: "your_telegram_bot_api_token"
 });
 
-setInterval(function () {
+dq.on('message', (message) => {
 
-    dq.getUpdates();
+  const to = message.to;
+  const text = message.text;
+  const moduleResponse = dq.initModule(text);
 
-}, 3000);
+  dq.send({ to, text: moduleResponse });
+})
+
+
+dq.listen((err) => {
+  if (err) console.error(err);
+});
 
 ```
 
@@ -46,7 +54,7 @@ $ node app.js
 
 Command implementations are stored in `Modules`. All modules should be registered in `modulesList.js` for bot to
 recognise them and referenced in `modules/index.js`.
- 
+
 #### Default commands:
 
 Text this commands directly to you newly created bot.
