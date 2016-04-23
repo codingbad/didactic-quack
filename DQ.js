@@ -2,7 +2,7 @@
 
 import util from 'util';
 
-import _ from 'underscore';
+import _ from 'lodash';
 import request from 'request';
 import URL from 'url';
 import string from 'string';
@@ -115,7 +115,7 @@ export class DQ extends EventEmitter {
 
 	_eachMessage(msgs, cb) {
 
-		_.each(msgs, (msg) => {
+		_.forEach(msgs, (msg) => {
 
 			const to = this._recipient = msg.message.from.id;
 			const text = msg.message.text;
