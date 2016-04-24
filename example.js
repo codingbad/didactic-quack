@@ -5,6 +5,8 @@ import config from './config/conf.js';
 import logger from 'intel';
 import imageRecognition from './lib/modules/imageRecognition.js';
 
+
+
 const dq = new DQ({
 	token: config.token,
 	parent: config.parent
@@ -18,8 +20,8 @@ dq.on('message', async (message) => {
 	let moduleResponse;
 
 	if (text) {
-		moduleResponse = dq.initModule(text, to);
-		dq.send({ to, text: moduleResponse });
+		moduleResponse = await dq.initModule(text, to);
+		dq.send({ to, text: moduleResponse.response.join('') });
 	} else if (photoUrl) {
 		const { gender, age } = await imageRecognition(photoUrl);
 		/** Display gender and age */

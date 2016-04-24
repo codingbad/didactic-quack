@@ -47,7 +47,7 @@ export class DQ extends EventEmitter {
 				if (err) cb(err);
 			});
 
-		}, 3000);
+		}, 2000);
 
 	}
 
