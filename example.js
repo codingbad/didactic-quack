@@ -12,7 +12,7 @@ const dq = new DQ({
 });
 
 dq.on('message', async (message) => {
-	const { to, text, photoUrl } = message;
+	const { to, text, url: photoUrl } = message;
 	console.log(message);
 
 	let moduleResponse;
@@ -21,9 +21,9 @@ dq.on('message', async (message) => {
 		moduleResponse = dq.initModule(text);
 		dq.send({ to, text: moduleResponse });
 	} else if (photoUrl) {
-		const res = await imageRecognition(photoUrl);
+		const { gender, age } = await imageRecognition(photoUrl);
 		/** Display gender and age */
-		dq.send({ to, text: JSON.stringify(res) });
+		dq.send({ to, text: `You look like ${age.ageRange} and you seem like ${gender.gender}.\n` });
 	}
 })
 
