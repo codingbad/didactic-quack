@@ -42,14 +42,19 @@ dq.on('message', async (message) => {
 
 	} else if (photoUrl) {
 		const { gender, age } = await imageRecognition(photoUrl);
+
+		let q = age.ageRange;
+		let a = q.split('-');
+		let b = (parseInt(a[0])+parseInt(a[1]))/2;
+
 		/** Display gender and age */
-		dq.send({ to, text: `You look like ${age.ageRange} and you seem like ${gender.gender}.\n` });
+		dq.send({ to, text: `You look like ${b} and you seem like ${gender.gender}.\n` });
 	} else if (location) {
 
 		if (location.hasOwnProperty('title') && location.hasOwnProperty('address')) {
 			dq.send({
 				to,
-				text: `Your location is ${location.title} in ${location.address}. The neares health assistant is located in about 100 meters towards F-building, Health Care MAMK center.`;
+				text: `Your location is ${location.title} in ${location.address}. The neares health assistant is located in about 100 meters towards F-building, Health Care MAMK center.`
 			})
 		}
 	}
