@@ -12,6 +12,7 @@ import logger from 'intel';
 import modulesList from './lib/modulesList';
 import modules from './lib/modules';
 import { EventEmitter } from 'events';
+import makePromise from './lib/makePromise.js';
 
 export class DQ extends EventEmitter {
 	constructor(params) {
@@ -133,39 +134,32 @@ export class DQ extends EventEmitter {
 	}
 
 	_eachMessage(msgs, cb) {
-		_.forEach(msgs, (msg) => {
+		_.forEach(msgs, async (msg) => {
 			let to, text, photo;
+			let url;
 			to = this._recipient = msg.message.from.id;
 			if (msg.message.text) {
 				text = msg.message.text;
 			} else if (msg.message.photo) {
-				console.log("photo")
-				console.log(msg.message.photo);
+				// console.log("photo")
+				// console.log(msg.message.photo);
 				photo = this._getLargestFile(msg.message.photo);
-				this._httpGetFinalDownloadFile(photo.file_id, (err, url) => {
-					if (err) return cb(err);
 
-					cb(null, url);
-				});
+				try {
+					url = await makePromise(this._httpGetFinalDownloadFile, this)(photo.file_id);
+				} catch (err) {
+					cb(err);
+					return;
+				}
+				console.log('URL', url);
 			} else if (msg.message.document) {
 				console.log("documents are not supported yet.");
-
-				// console.log("doc");
-				// console.log(msg.message.document);
-				//
-				// photo = msg.message.document;
-				//
-				// this._httpGetFinalDownloadFile(photo.file_id, (err, res) => {
-				//
-				// 	if (err) console.log(err);
-				//
-				// });
 			}
 
 			cb(null, {
 				to,
 				text,
-				photo
+				url
 			});
 		});
 	}
