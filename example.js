@@ -1,6 +1,6 @@
-// import { DQ } from './DQ.js';
-// import config from './config/conf.js';
-// import logger from 'intel';
+import { DQ } from './DQ.js';
+import config from './config/conf.js';
+import logger from 'intel';
 
 import watson from 'watson-developer-cloud';
 import fs from 'fs';
@@ -18,40 +18,46 @@ const alchemy_vision_Pr = makePromise(
 	alchemy_vision.recognizeFaces,
 	alchemy_vision);
 
-(async () => {
+// (async () => {
 
-	await new Promise((resolve, reject) => {
-		request('https://scontent-arn2-1.xx.fbcdn.net/v/t34.0-12/13084333_1779439385621466_1503497067_n.jpg?oh=ea6c2e7255dce395184768194e6bb0e3&oe=571E2340')
-			.pipe(fs.createWriteStream('temp.png'))
-			.on('close', (response) => { resolve(response); })
-			.on('error', (error) => { reject(error); });
-	});
+// 	await new Promise((resolve, reject) => {
+// 		request('https://scontent-arn2-1.xx.fbcdn.net/v/t34.0-12/13084333_1779439385621466_1503497067_n.jpg?oh=ea6c2e7255dce395184768194e6bb0e3&oe=571E2340')
+// 			.pipe(fs.createWriteStream('temp.png'))
+// 			.on('close', (response) => { resolve(response); })
+// 			.on('error', (error) => { reject(error); });
+// 	});
 
-	let alchemyResult = await alchemy_vision_Pr({
-		image: fs.createReadStream('temp.png')
-	});
+// 	let alchemyResult = await alchemy_vision_Pr({
+// 		image: fs.createReadStream('temp.png')
+// 	});
 
-	console.log('alchemyResult: ');
-	const { age, gender } = alchemyResult.imageFaces[0];
-	console.log(age, gender);
-})().catch((error) => {
-	console.error(error);
+// 	console.log('alchemyResult: ');
+// 	const { age, gender } = alchemyResult.imageFaces[0];
+// 	console.log(age, gender);
+// })().catch((error) => {
+// 	console.error(error);
+// });
+
+const dq = new DQ({
+	token: config.token,
+	parent: config.parent
 });
 
-// const dq = new DQ({
-// 	token: config.token,
-// 	parent: config.parent
-// });
+dq.on('message', (message) => {
+	const { to, text, photo } = message;
 
-// dq.on('message', (message) => {
-// 	const to = message.to;
-// 	const text = message.text;
-// 	const moduleResponse = dq.initModule(text);
+	let moduleResponse;
 
-// 	dq.send({ to, text: moduleResponse });
-// })
+	if (text) {
+		moduleResponse = dq.initModule(text);
+		dq.send({ to, text: moduleResponse });
+	} else if (photo) {
+		// do something with photo
+		dq.send({ to, text: 'Got an Image!' });
+	}
+})
 
 
-// dq.listen((err) => {
-// 	if (err) logger.error(err);
-// });
+dq.listen((err) => {
+	if (err) logger.error(err);
+});
