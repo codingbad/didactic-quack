@@ -22,26 +22,37 @@ Wrapper around [Telegram](https://telegram.org/) messenger API.
 #### In `app.js`:
 
 ```javascript
-const DQ = require('didactic-quack');
+import { DQ } from 'didactic-quack';
+import config from './config/conf.js';
+import imageRecognition from './lib/modules/imageRecognition.js';
 
-const dq = new DQ({
-    token: "your_telegram_bot_api_token"
+
+const dq = new DQ({ token: config.token });
+
+dq.on('message', async (message) => {
+
+	const { to, text, photoUrl } = message;
+
+	let moduleResponse;
+
+	if (text) {
+
+		moduleResponse = dq.initModule(text);
+
+		dq.send({ to, text: moduleResponse });
+
+	} else if (photoUrl) {
+
+		const { gender, age } = await imageRecognition(photoUrl);
+
+		/** Display gender and age */
+		dq.send({ to, text: `You look like ${age.ageRange} and you seem like ${gender.gender}.\n` });
+	}
 });
-
-dq.on('message', (message) => {
-
-  const to = message.to;
-  const text = message.text;
-  const moduleResponse = dq.initModule(text);
-
-  dq.send({ to, text: moduleResponse });
-})
-
 
 dq.listen((err) => {
-  if (err) console.error(err);
+	if (err) console.error(err);
 });
-
 ```
 
 #### Run:
