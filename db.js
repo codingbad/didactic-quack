@@ -1,5 +1,5 @@
-const Datastopr = require('nedb');
+const Datastore = require('nedb');
 
-const session = new Datastore({ filename: __dirname+'/db/sesstions.db'});
+const sessions = new Datastore({ filename: __dirname + '/db/sessions.db'});
 
-module.sessions = sessions;
+exports.sessions = sessions;
