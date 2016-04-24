@@ -8,6 +8,7 @@
     "intel": "^1.0.2",
     "lodash": "^4.11.1",
     "moment": "^2.10.6",
+    "nedb": "^1.8.0",
     "promisify-object": "^1.2.1",
     "request": "^2.62.0",
     "string": "^3.3.1",
