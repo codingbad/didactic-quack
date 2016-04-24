@@ -11,9 +11,18 @@ dq.on('message', (message) => {
 
   const to = message.to;
   const text = message.text;
-  const moduleResponse = dq.initModule(text);
+  const photo = message.photo;
 
-  dq.send({ to, text: moduleResponse });
+  let moduleResponse;
+
+  if (text) {
+    moduleResponse = dq.initModule(text);
+    dq.send({ to, text: moduleResponse });
+  } else if (photo) {
+
+    // do something with photo
+    dq.send({ to, text: 'Got an Image!' });
+  }
 })
 
 
