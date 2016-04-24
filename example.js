@@ -3,8 +3,8 @@ import config from './config/conf.js';
 import logger from 'intel';
 
 const dq = new DQ({
-    token: config.token,
-    parent: config.parent
+	token: config.token,
+	parent: config.parent
 });
 
 dq.on('message', (message) => {

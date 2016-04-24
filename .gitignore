@@ -2,3 +2,4 @@
 config/conf.js
 node_modules/
 npm-debug.log
+example.bundle.js
