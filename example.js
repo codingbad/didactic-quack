@@ -9,6 +9,10 @@ import string from 'string';
 
 import Dialog from './lib/modules/dialog.js';
 
+import _ from 'lodash';
+
+import m from 'moment'
+
 const pizzaDialog = new Dialog();
 
 const dq = new DQ({
@@ -20,14 +24,31 @@ dq.on('message', async (message) => {
 
 	const { to, text, photoUrl, location } = message;
 
+	function c (text, keys) {
+		_.has(keys, (key) => {
+			return string(text).contains(key)
+		})
+	}
+
 	if (text) {
 
-		if (string(text).contains('/start')) {
+		if (c(text, ['/start', 'help', 'assist'])) {
 
 			// send default message
 			dq.send({ to, text: "Hi there! \n\n1. Upload your selfie to see some cool stuff!\n"+
 			"2. Start conversation with a HealthAssistant Bot.\n"+
 		 	"3. Get the nearest Health Assistant location by sharing your locaion."});
+
+		} else if (c(text, 'Hello, how are you?')) {
+			dq.send({to, text: "I am fine, thanks!"});
+
+		} else if (c(text, ['remind', 'Remind'])) {
+
+			const nowHours = m();
+			const finalDate = m().add('hours', 5);
+			const hours = m().hours();
+
+			dq.send({to, text: "I'll remind you at " + hours });
 
 		} else {
 
