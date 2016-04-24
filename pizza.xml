@@ -4,7 +4,7 @@
         <folder label="Main">
             <output>
                 <prompt selectionType="RANDOM">
-                    <item>Hi, I'm Healthul Assistant! It's time to feel better!</item>
+                    <item>Hi, I'm health bot assistant! I hope everything is going well with you!</item>
                 </prompt>
                 <goto ref="getUserInput_2442994"/>
             </output>

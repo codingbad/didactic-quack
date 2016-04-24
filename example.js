@@ -22,12 +22,10 @@ const dq = new DQ({
 
 dq.on('message', async (message) => {
 
-	const { to, text, photoUrl, location } = message;
+	const { to, text, photoUrl, location, first_name } = message;
 
 	function c (text, keys) {
-		_.has(keys, (key) => {
-			return string(text).contains(key)
-		})
+		return _.some(keys, (key) => _.includes(_.words(text), key));
 	}
 
 	if (text) {
@@ -35,22 +33,28 @@ dq.on('message', async (message) => {
 		if (c(text, ['/start', 'help', 'assist'])) {
 
 			// send default message
-			dq.send({ to, text: "Hi there! \n\n1. Upload your selfie to see some cool stuff!\n"+
+			dq.send({ to, text: "Hi "+first_name+"! \n\n1. Upload your selfie to see some cool stuff!\n"+
 			"2. Start conversation with a HealthAssistant Bot.\n"+
 		 	"3. Get the nearest Health Assistant location by sharing your locaion."});
 
-		} else if (c(text, 'Hello, how are you?')) {
-			dq.send({to, text: "I am fine, thanks!"});
-
 		} else if (c(text, ['remind', 'Remind'])) {
 
-			const nowHours = m();
-			const finalDate = m().add('hours', 5);
-			const hours = m().hours();
+			const finalDate = m().add('hours', parseInt(text.match(/\d+/)[0]));
 
-			dq.send({to, text: "I'll remind you at " + hours });
+			dq.send({to, text: "I'll remind you " + finalDate.calendar() });
 
-		} else {
+		} else if (c(text, ['afternoon'])){
+			dq.send({to, text: 'Hei '+first_name+'. Can you please upload your picture. We need to preccess more information about you.'})
+		} else if (c(text, ['sick'])) {
+			dq.send({to, text: "Oh sorry to hear that "+first_name+"! Let me try to help you with that. Give me specifics on what's wrong."});
+		} else if (c(text, ['headache', 'head', 'head-', 'stomachache'])){
+			dq.send({to, text: "Don't worry I can help you with that. On a scale of 1 to 5, how serious do you think it is?"});
+		} else if (c(text, ['3', '4', '5', 'serious'])) {
+			dq.send({to, text: 'You can give me your location, and I will suggest the nearest doctor.'});
+		} else if (c(text, ['map', 'bye'])) {
+			dq.send({to, text: 'Alright, let me share the map.'});
+		}
+		else {
 
 			// go with dialog thing
 			const botResponse =  await pizzaDialog.input({
@@ -69,13 +73,16 @@ dq.on('message', async (message) => {
 		let b = (parseInt(a[0])+parseInt(a[1]))/2;
 
 		/** Display gender and age */
-		dq.send({ to, text: `You look like ${b} and you seem like ${gender.gender}.\n` });
+		dq.send({ to, text: `It's always tricky to guess the age, or especilly the gender. I apologize before I use my algorithms to figure your picture out (type help in case of a mistake).\n 
+			So you look like a ${b} years old ${gender.gender}.\n
+			My cofidence level is at ${Math.ceil(gender.score * 100)}%.\n
+			Is there anything I can help you with?` });
 	} else if (location) {
 
 		if (location.hasOwnProperty('title') && location.hasOwnProperty('address')) {
 			dq.send({
 				to,
-				text: `Your location is ${location.title} in ${location.address}. The neares health assistant is located in about 100 meters towards F-building, Health Care MAMK center.`
+				text: `Right now you are in ${location.title} in ${location.address}. The nearest medical assistance you can get is  in a 100 meters of diameter. It is in Tarkkampujankuja 6.`
 			})
 		}
 	}

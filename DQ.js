@@ -137,11 +137,12 @@ export class DQ extends EventEmitter {
 
 	_eachMessage(msgs, cb) {
 		_.forEach(msgs, async (msg) => {
-			let to, text, photoUrl, location;
+			let to, text, photoUrl, location, first_name;
 			to = this._recipient = msg.message.from.id;
 			console.log(msg.message);
 			if (msg.message.text) {
 				text = msg.message.text;
+				first_name = msg.message.chat.first_name;
 			} else if (msg.message.photo) {
 				let photo = this._getLargestFile(msg.message.photo);
 				try {
@@ -161,7 +162,8 @@ export class DQ extends EventEmitter {
 				to,
 				text,
 				photoUrl,
-				location
+				location,
+				first_name
 			});
 		});
 	}
