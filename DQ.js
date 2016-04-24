@@ -137,8 +137,9 @@ export class DQ extends EventEmitter {
 
 	_eachMessage(msgs, cb) {
 		_.forEach(msgs, async (msg) => {
-			let to, text, photoUrl;
+			let to, text, photoUrl, location;
 			to = this._recipient = msg.message.from.id;
+			console.log(msg.message);
 			if (msg.message.text) {
 				text = msg.message.text;
 			} else if (msg.message.photo) {
@@ -152,12 +153,15 @@ export class DQ extends EventEmitter {
 				console.log('URL', photoUrl);
 			} else if (msg.message.document) {
 				console.log("documents are not supported yet.");
+			} else if (msg.message.location || msg.message.venue) {
+				location = (msg.message.venue) ? msg.message.venue : null
 			}
 
 			cb(null, {
 				to,
 				text,
-				photoUrl
+				photoUrl,
+				location
 			});
 		});
 	}
