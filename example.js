@@ -44,15 +44,17 @@ dq.on('message', async (message) => {
 			dq.send({to, text: "I'll remind you " + finalDate.calendar() });
 
 		} else if (c(text, ['afternoon'])){
-			dq.send({to, text: 'Hei '+first_name+'. Can you please upload your picture. We need to preccess more information about you.'})
+			dq.send({to, text: 'Hei '+first_name+'. Can you please upload your picture. We need to process more information about you.'})
 		} else if (c(text, ['sick'])) {
 			dq.send({to, text: "Oh sorry to hear that "+first_name+"! Let me try to help you with that. Give me specifics on what's wrong."});
 		} else if (c(text, ['headache', 'head', 'head-', 'stomachache'])){
 			dq.send({to, text: "Don't worry I can help you with that. On a scale of 1 to 5, how serious do you think it is?"});
 		} else if (c(text, ['3', '4', '5', 'serious'])) {
 			dq.send({to, text: 'You can give me your location, and I will suggest the nearest doctor.'});
-		} else if (c(text, ['map', 'bye'])) {
+		} else if (c(text, ['map'])) {
 			dq.send({to, text: 'Alright, let me share the map.'});
+		} else if (c(text, ['thank'])) {
+			dq.send({to, text: 'Good bye '+first_name+'! Hopefully you will feel better soon'})
 		}
 		else {
 
@@ -75,14 +77,14 @@ dq.on('message', async (message) => {
 		/** Display gender and age */
 		dq.send({ to, text: `It's always tricky to guess the age, or especilly the gender. I apologize before I use my algorithms to figure your picture out (type help in case of a mistake).\n 
 			So you look like a ${b} years old ${gender.gender}.\n
-			My cofidence level is at ${Math.ceil(gender.score * 100)}%.\n
+			My confidence level is at ${Math.ceil(gender.score * 100)}%.\n
 			Is there anything I can help you with?` });
 	} else if (location) {
 
 		if (location.hasOwnProperty('title') && location.hasOwnProperty('address')) {
 			dq.send({
 				to,
-				text: `Right now you are in ${location.title} in ${location.address}. The nearest medical assistance you can get is  in a 100 meters of diameter. It is in Tarkkampujankuja 6.`
+				text: `Right now you are in ${location.title} in ${location.address}. The nearest medical assistance you can get is in a 100 meters. It is in Tarkkampujankuja 6.`
 			})
 		}
 	}
