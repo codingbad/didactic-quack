@@ -61,13 +61,13 @@ export class DQ extends EventEmitter {
 		});
 	}
 
-	initModule(text) {
+	initModule(text, to) {
 		// Check if message text contains any command from list
 		if (this._hasCommand(text)) {
 			// If it does then fire up specific command
 			const moduleName = this._getCommandName(text);
 			return this._modules[moduleName](text);
-		} else return this._modules.default(); // if Not fire up the default IBM dialog
+		} else return this._modules.default(text, to); // if Not fire up the default IBM dialog
 	}
 
 	_httpGet(cb) {

@@ -5,7 +5,6 @@ import config from './config/conf.js';
 import logger from 'intel';
 import imageRecognition from './lib/modules/imageRecognition.js';
 
-
 const dq = new DQ({
 	token: config.token,
 	parent: config.parent
@@ -13,12 +12,13 @@ const dq = new DQ({
 
 dq.on('message', async (message) => {
 	const { to, text, photoUrl } = message;
+	console.log('TO: ', to);
 	logger.info(message);
 
 	let moduleResponse;
 
 	if (text) {
-		moduleResponse = dq.initModule(text);
+		moduleResponse = dq.initModule(text, to);
 		dq.send({ to, text: moduleResponse });
 	} else if (photoUrl) {
 		const { gender, age } = await imageRecognition(photoUrl);
