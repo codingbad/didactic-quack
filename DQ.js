@@ -62,10 +62,12 @@ export class DQ extends EventEmitter {
 	}
 
 	initModule(text) {
+		// Check if message text contains any command from list
 		if (this._hasCommand(text)) {
+			// If it does then fire up specific command
 			const moduleName = this._getCommandName(text);
 			return this._modules[moduleName](text);
-		} else return this._modules.default();
+		} else return this._modules.default(); // if Not fire up the default IBM dialog
 	}
 
 	_httpGet(cb) {
@@ -135,23 +137,19 @@ export class DQ extends EventEmitter {
 
 	_eachMessage(msgs, cb) {
 		_.forEach(msgs, async (msg) => {
-			let to, text, photo;
-			let url;
+			let to, text, photoUrl;
 			to = this._recipient = msg.message.from.id;
 			if (msg.message.text) {
 				text = msg.message.text;
 			} else if (msg.message.photo) {
-				// console.log("photo")
-				// console.log(msg.message.photo);
-				photo = this._getLargestFile(msg.message.photo);
-
+				let photo = this._getLargestFile(msg.message.photo);
 				try {
-					url = await makePromise(this._httpGetFinalDownloadFile, this)(photo.file_id);
+					photoUrl = await makePromise(this._httpGetFinalDownloadFile, this)(photo.file_id);
 				} catch (err) {
 					cb(err);
 					return;
 				}
-				console.log('URL', url);
+				console.log('URL', photoUrl);
 			} else if (msg.message.document) {
 				console.log("documents are not supported yet.");
 			}
@@ -159,7 +157,7 @@ export class DQ extends EventEmitter {
 			cb(null, {
 				to,
 				text,
-				url
+				photoUrl
 			});
 		});
 	}

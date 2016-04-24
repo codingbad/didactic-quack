@@ -12,8 +12,8 @@ const dq = new DQ({
 });
 
 dq.on('message', async (message) => {
-	const { to, text, url: photoUrl } = message;
-	console.log(message);
+	const { to, text, photoUrl } = message;
+	logger.info(message);
 
 	let moduleResponse;
 
