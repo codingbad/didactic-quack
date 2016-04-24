@@ -1,8 +1,6 @@
-# didactic-quack
+# health-assistant-bot
 
 Wrapper around [Telegram](https://telegram.org/) messenger API.
-
-![NPM Stats](https://nodei.co/npm/didactic-quack.png?downloads=true&downloadRank=true&stars=true)
 
 ### Installation & setup
 
@@ -14,7 +12,7 @@ Wrapper around [Telegram](https://telegram.org/) messenger API.
 
 3. Install npm package.
     ```
-    $ npm i didactic-quack --save
+    $ npm i health-assistant-bot --save
     ```
 
 ## Usage
@@ -25,7 +23,6 @@ Wrapper around [Telegram](https://telegram.org/) messenger API.
 import { DQ } from 'didactic-quack';
 import config from './config/conf.js';
 import imageRecognition from './lib/modules/imageRecognition.js';
-
 
 const dq = new DQ({ token: config.token });
 
@@ -58,40 +55,11 @@ dq.listen((err) => {
 #### Run:
 
  ```
-$ node app.js
+$ npm i webpack -g
+$ npm i
+$ npm start
 ```
-
-#### Commands:
-
-Command implementations are stored in `Modules`. All modules should be registered in `modulesList.js` for bot to
-recognise them and referenced in `modules/index.js`.
-
-#### Default commands:
-
-Text this commands directly to you newly created bot.
-
-* `/time` - returns current time.
-
-* `/log <project> | <hours> | <details>` - returns logged data. (Does not do more. Only parses data and returns in user-friendly way).
-
-`<project>` - `String`
-
-`<hours>` - `Double`
-
-`<details>` - `String`
-
-## Changelog:
-
-`v0.3.0` - Refactored almost all. Added modules. Offset now stored in memory.
-
-`v0.2.2` - Fixed path to `offset.txt`.
-
-`v0.2.0` - Removed `Cron` & `Mongoose`. Code cleanup. Changed project structure.
-
-## ToDo:
-
-* Set up a web hook for a bot to receive new messages automatically. (Get rid of "manual" requests to the server).
 
 ## License
 
-[MIT license](https://github.com/frenchbread/didactic-quack/blob/master/LICENSE.md).
+[MIT license](https://github.com/codingbad/health-assistant-bot/blob/master/LICENSE.md).
